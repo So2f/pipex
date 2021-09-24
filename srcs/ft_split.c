@@ -12,81 +12,90 @@
 
 #include "../includes/pipex.h"
 
-int		ft_count_words(const char *s, char c)
+static void	ft_bzero(void *s, size_t n)
 {
-	int i;
-	int words;
+	char	*ptr;
+	size_t	i;
 
+	if (!n)
+		return ;
+	ptr = s;
 	i = 0;
-	words = 0;
-	while (s[i])
-	{
-		if (s[i] != c)
-		{
-			words++;
-			while (s[i] != c && s[i])
-				i++;
-		}
-		else
-			i++;
-	}
-	return (words);
+	while (i < n)
+		*(ptr + i++) = 0;
 }
 
-char	**ft_size_words(const char *s, char c, char **dest)
+static char	*ft_strnew(size_t size)
 {
-	int i;
-	int j;
-	int size_word;
+	char	*str;
 
-	i = 0;
-	j = 0;
-	while (s[i])
-	{
-		size_word = 0;
-		if (s[i] != c)
-		{
-			while (s[i] != c && s[i])
-			{
-				++size_word;
-				++i;
-			}
-			dest[j] = malloc(sizeof(char) * (size_word + 1));
-			j++;
-			if (!dest)
-				return (NULL);
-		}
-		else
-			i++;
-	}
-	return (dest);
+	str = (char *)malloc(sizeof(char) * size + 1);
+	if (!str)
+		return (NULL);
+	ft_bzero(str, size + 1);
+	return (str);
 }
 
-char	**ft_split(const char *s, char c)
+static int	ft_countwords(char const *str, char c)
+{
+	int	count;
+	int	i;
+
+	i = 0;
+	count = 0;
+	while (str[i])
+	{
+		while (str[i] == c)
+			i++;
+		if (str[i] != c && str[i] != '\0')
+			count++;
+		while (str[i] != c && str[i] != '\0')
+			i++;
+	}
+	return (count);
+}
+
+static int	get_word_len(char const *str, char c)
+{
+	int	i;
+	int	len;
+
+	i = 0;
+	len = 0;
+	while (str[i] == c)
+		i++;
+	while (str[i] != c && str[i] != '\0')
+	{
+		i++;
+		len++;
+	}
+	return (len);
+}
+
+char	**ft_split(char const *s, char c)
 {
 	int		i;
 	int		j;
 	int		k;
-	char	**dest;
+	char	**str2;
 
-	i = 0;
+	str2 = (char **)malloc(sizeof(*str2) * (ft_countwords(s, c) + 1));
+	if (!s || !str2)
+		return (NULL);
+	i = -1;
 	j = 0;
-	if (!(dest = malloc(sizeof(char*) * (ft_count_words(s, c) + 1))))
-		return (NULL);
-	if (!(ft_size_words(s, c, dest)))
-		return (NULL);
-	while (s[i] && !(k = 0))
+	while (++i < ft_countwords(s, c))
 	{
-		if (s[i] != c)
-		{
-			while (s[i] != c && s[i])
-				dest[j][k++] = s[i++];
-			dest[j][k] = '\0';
+		k = 0;
+		str2[i] = ft_strnew(get_word_len(&s[j], c) + 1);
+		if (!str2)
+			str2[i] = NULL;
+		while (s[j] == c)
 			j++;
-		}
-		else
-			i++;
+		while (s[j] != c && s[j])
+			str2[i][k++] = s[j++];
+		str2[i][k] = '\0';
 	}
-	dest[j] = NULL;
-	return (dest);
+	str2[i] = 0;
+	return (str2);
 }
